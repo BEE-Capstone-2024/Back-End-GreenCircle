@@ -9,6 +9,7 @@ const signUpRoutes = require("./routes/signUp");
 const signInRoutes = require("./routes/signIn");
 const preferencesRoutes = require("./routes/preferences");
 const eventRoutes = require("./routes/events");
+const collectRoutes = require("./routes/collect");
 const errorHandler = require("./middlewares/error");
 
 
@@ -29,6 +30,7 @@ app.use("/api/signup", signUpRoutes);
 app.use("/api/signin", signInRoutes);
 app.use("/api/preferences", preferencesRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/collect", collectRoutes);
 
 
 app.use("/", (req, res) => {
