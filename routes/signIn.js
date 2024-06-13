@@ -6,10 +6,7 @@ const {
 
 const router = express.Router();
 
-// GET: /api/signin/
-// router.get("/", getUser);
-
 //POST: /api/signin/
-router.post("/", createUser);
+router.post("/", getUser);
 
 module.exports = router;
