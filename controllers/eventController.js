@@ -1,6 +1,7 @@
 require('dotenv').config()
 const { get } = require('mongoose');
 const Event = require('../models/Event')
+const Location = require('../models/Location')
 
 const jwt = require('jsonwebtoken')
 
@@ -11,6 +12,16 @@ const createEvent = async (req, res, next) => {
   const { eventName, description, locationId, meetingLocation, dateOfEvent, startTime, endTime, participants } = req.body;
 
   try {
+
+    const locationExists = await Location.findById(locationId);
+
+    if (!locationExists) {
+      return res.status(404).json({
+        success: false,
+        message: "Location not found",
+      });
+    }
+
     const event = new Event({
       user: userId,
       eventName,

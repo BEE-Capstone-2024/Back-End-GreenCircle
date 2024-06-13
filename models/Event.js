@@ -6,7 +6,6 @@ const eventSchema = new mongoose.Schema(
         user: {
             type: String,
             required: [true, "User is required"],
-            unique: true,
         },
         eventName: {
             type: String,
@@ -21,14 +20,8 @@ const eventSchema = new mongoose.Schema(
             required: [true, "Location ID is required"]
         },
         meetingLocation: {
-            longitude: {
-                type: Number,
-                required: [true, "Longitude is required"]
-            },
-            latitude: {
-                type: Number,
-                required: [true, "Latitude is required"]
-            }
+            type: String,
+            required: [true, "Meeting location is required"]
         },
         dateOfEvent: {
             type: Date,
