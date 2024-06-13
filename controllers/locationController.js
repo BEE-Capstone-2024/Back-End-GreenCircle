@@ -46,7 +46,6 @@ const getLocations = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.id;
 
         const locations = await Location.find();
         res.status(200).json({
