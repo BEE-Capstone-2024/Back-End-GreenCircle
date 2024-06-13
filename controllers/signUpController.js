@@ -11,7 +11,6 @@ const createUser = async (req, res, next) => {
       return next(new Error("name, photo, email & password fields are required"));
     }
 
-    // Check if user already exists
     const isUserExists = await User.findOne({ profilePhoto, email });
 
     if (isUserExists) {
@@ -27,10 +26,13 @@ const createUser = async (req, res, next) => {
       expiresIn: 60 * 60 * 24,
     });
 
+    const userObject = user.toObject();
+    delete userObject.password;
+
     res.status(200).json({
       success: true,
       message: "User created successfully",
-      user,
+      user: userObject,
       token,
     });
 
@@ -40,7 +42,6 @@ const createUser = async (req, res, next) => {
   }
 }
 
-
 module.exports = {
     createUser,
-  };
+};
