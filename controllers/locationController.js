@@ -37,6 +37,20 @@ const createLocation = async (req, res, next) => {
     }
 }
 
+const getLocations = async (req, res, next) => {
+    try {
+        const locations = await Location.find();
+        res.status(200).json({
+            success: true,
+            locations,
+        });
+    } catch (error) {
+        console.log(error);
+        return next(error);
+    }
+}
+
 module.exports = {
     createLocation,
+    getLocations,
 }
