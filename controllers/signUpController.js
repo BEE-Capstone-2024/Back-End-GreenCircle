@@ -5,20 +5,20 @@ const jwt =  require("jsonwebtoken");
 
 const createUser = async (req, res, next) => {
   try {
-    const { name, profilePhoto, email, password } = req.body;
-    if (!name || !profilePhoto || !email || !password) {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
       res.status(400);
       return next(new Error("name, photo, email & password fields are required"));
     }
 
-    const isUserExists = await User.findOne({ profilePhoto, email });
+    const isUserExists = await User.findOne({ email });
 
     if (isUserExists) {
       res.status(404);
       return next(new Error("User already exists"));
     }
 
-    const user = new User({ name, profilePhoto, email });
+    const user = new User({ name, email });
     user.password = await user.encryptPassword(password);
     await user.save();
 
