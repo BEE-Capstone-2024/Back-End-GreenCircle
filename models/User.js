@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
     profilePhoto: {
       type: String,
       required: [false, "Profile photo is required"],
-      unique: true,
+      unique: false,
     },
     email: {
       type: String,

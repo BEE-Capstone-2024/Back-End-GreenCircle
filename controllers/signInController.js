@@ -23,6 +23,9 @@ const getUser = async (req, res, next) => {
             return next(new Error("Invalid password"))
         }
 
+        const userObject = user.toObject()
+        delete userObject.password
+
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
             expiresIn: 60 * 60 * 24
         })
@@ -30,7 +33,7 @@ const getUser = async (req, res, next) => {
         res.status(200).json({
             success: true,
             message: "User signed in successfully",
-            user,
+            user: userObject,
             token
         })
     } catch (error) {

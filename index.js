@@ -8,6 +8,9 @@ const userRoutes = require("./routes/users");
 const signUpRoutes = require("./routes/signUp");
 const signInRoutes = require("./routes/signIn");
 const preferencesRoutes = require("./routes/preferences");
+const eventRoutes = require("./routes/events");
+const collectRoutes = require("./routes/collect");
+const locationRoutes = require("./routes/locations");
 const errorHandler = require("./middlewares/error");
 
 
@@ -27,6 +30,10 @@ app.use("/api/user", userRoutes)
 app.use("/api/signup", signUpRoutes);
 app.use("/api/signin", signInRoutes);
 app.use("/api/preferences", preferencesRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/collect", collectRoutes);
+app.use("/api/location", locationRoutes);
+
 
 app.use("/", (req, res) => {
   return res.json({
