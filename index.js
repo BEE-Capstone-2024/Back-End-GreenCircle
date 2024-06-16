@@ -13,7 +13,6 @@ const collectRoutes = require("./routes/collect");
 const locationRoutes = require("./routes/locations");
 const errorHandler = require("./middlewares/error");
 
-
 // Connect to DB
 connectDB();
 
@@ -26,7 +25,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use("/api/user", userRoutes)
+app.use("/api/user", userRoutes);
 app.use("/api/signup", signUpRoutes);
 app.use("/api/signin", signInRoutes);
 app.use("/api/preferences", preferencesRoutes);
@@ -34,17 +33,19 @@ app.use("/api/events", eventRoutes);
 app.use("/api/collect", collectRoutes);
 app.use("/api/location", locationRoutes);
 
-
 app.use("/", (req, res) => {
   return res.json({
-    message: "BEE-CAPSTONE-PROJECT"
+    message: "BEE-CAPSTONE-PROJECT",
   });
 });
 
 app.use(errorHandler);
 
 const server = app.listen(port, () =>
-  console.log(`Server started listening on http://localhost:${port}/`)
+  // console.log(`Server started listening on http://localhost:${port}/`)
+  console.log(
+    "ci cd test: Server started listening on http://localhost:${port}/"
+  )
 );
 
 process.on("unhandledRejection", (error, promise) => {
