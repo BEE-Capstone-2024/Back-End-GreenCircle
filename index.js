@@ -35,7 +35,7 @@ app.use("/api/location", locationRoutes);
 
 app.use("/", (req, res) => {
   return res.json({
-    message: "BEE-CAPSTONE-PROJECT CI/CD TEST",
+    message: "BEE-CAPSTONE-PROJECT",
   });
 });
 
