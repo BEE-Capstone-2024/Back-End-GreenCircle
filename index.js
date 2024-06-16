@@ -35,17 +35,14 @@ app.use("/api/location", locationRoutes);
 
 app.use("/", (req, res) => {
   return res.json({
-    message: "BEE-CAPSTONE-PROJECT",
+    message: "BEE-CAPSTONE-PROJECT CI/CD TEST",
   });
 });
 
 app.use(errorHandler);
 
 const server = app.listen(port, () =>
-  // console.log(`Server started listening on http://localhost:${port}/`)
-  console.log(
-    "ci cd test: Server started listening on http://localhost:${port}/"
-  )
+  console.log(`Server started listening on http://localhost:${port}/`)
 );
 
 process.on("unhandledRejection", (error, promise) => {
