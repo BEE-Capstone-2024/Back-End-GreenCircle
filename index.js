@@ -13,7 +13,6 @@ const collectRoutes = require("./routes/collect");
 const locationRoutes = require("./routes/locations");
 const errorHandler = require("./middlewares/error");
 
-
 // Connect to DB
 connectDB();
 
@@ -26,7 +25,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use("/api/user", userRoutes)
+app.use("/api/user", userRoutes);
 app.use("/api/signup", signUpRoutes);
 app.use("/api/signin", signInRoutes);
 app.use("/api/preferences", preferencesRoutes);
@@ -34,10 +33,9 @@ app.use("/api/events", eventRoutes);
 app.use("/api/collect", collectRoutes);
 app.use("/api/location", locationRoutes);
 
-
 app.use("/", (req, res) => {
   return res.json({
-    message: "BEE-CAPSTONE-PROJECT"
+    message: "BEE-CAPSTONE-PROJECT",
   });
 });
 
