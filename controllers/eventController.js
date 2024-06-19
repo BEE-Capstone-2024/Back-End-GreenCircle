@@ -178,7 +178,7 @@ const updateEvent = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Could not access event by id",
+      message: "Could not access event by given id",
     });
     return;
   }

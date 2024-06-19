@@ -10,7 +10,7 @@ const collectionSchema = new mongoose.Schema(
     },
     event: {
       type: mongoose.Types.ObjectId,
-      ref: "Collection",
+      ref: "Event",
       required: [true, "Event ID is required"],
     },
     counts: {
