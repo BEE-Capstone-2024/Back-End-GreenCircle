@@ -107,14 +107,10 @@ const createEvent = async (req, res, next) => {
 
     const savedEvent = await event.save();
 
-    if (savedEvent == null) {
-      res.status(404).json(savedEvent);
-    } else {
-      res.status(201).json({
-        success: true,
-        savedEvent,
-      });
-    }
+    res.status(201).json({
+      success: true,
+      savedEvent,
+    });
   } catch (error) {
     res.status(500).json(error);
     console.log(error);

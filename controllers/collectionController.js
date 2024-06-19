@@ -13,30 +13,31 @@ const createCollection = async (req, res, next) => {
 
   const eventId = req.params.eventId;
 
-  const { counts } = req.body;
-  const { plastic, tobacco, metal, glass, fabric, paper } = counts;
+  // const { counts } = req.body;
+  // const { plastic, tobacco, metal, glass, fabric, paper } = counts;
 
   try {
     const collection = new Collection({
       user: userId,
       event: eventId,
-      counts: {
-        plastic,
-        tobacco,
-        metal,
-        glass,
-        fabric,
-        paper,
-      },
+      // counts: {
+      //   plastic,
+      //   tobacco,
+      //   metal,
+      //   glass,
+      //   fabric,
+      //   paper,
+      // },
     });
 
     const savedCollection = await collection.save();
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
       savedCollection,
     });
   } catch (error) {
+    res.status(500).json(error);
     console.log(error);
     return next(error);
   }

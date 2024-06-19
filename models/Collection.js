@@ -1,41 +1,48 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+// const bcrypt = require("bcryptjs");
 
 const collectionSchema = new mongoose.Schema(
   {
     user: {
-      type: String,
+      type: mongoose.Types.ObjectId,
+      ref: "User",
       required: [true, "User is required"],
-      unique: true,
     },
     event: {
-      type: String,
+      type: mongoose.Types.ObjectId,
+      ref: "Collection",
       required: [true, "Event ID is required"],
     },
     counts: {
       plastic: {
         type: Number,
-        required: [true, "plastic is required"],
+        min: 0,
+        default: 0,
       },
       tobacco: {
         type: Number,
-        required: [true, "tobacco is required"],
+        min: 0,
+        default: 0,
       },
       metal: {
         type: Number,
-        required: [true, "metal is required"],
+        min: 0,
+        default: 0,
       },
       glass: {
         type: Number,
-        required: [true, "glass is required"],
+        min: 0,
+        default: 0,
       },
       fabric: {
         type: Number,
-        required: [true, "fabric is required"],
+        min: 0,
+        default: 0,
       },
       paper: {
         type: Number,
-        required: [true, "paper is required"],
+        min: 0,
+        default: 0,
       },
     },
   },
