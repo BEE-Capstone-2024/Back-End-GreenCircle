@@ -1,8 +1,6 @@
-require("dotenv").config();
 const Event = require("../models/Event");
 const Location = require("../models/Location");
-
-const jwt = require("jsonwebtoken");
+const getUserIdByToken = require("../middlewares/jwtUtils");
 
 const getEvents = async (req, res) => {
   const eventId = req.params.eventId;
@@ -34,9 +32,14 @@ const getEvents = async (req, res) => {
 };
 
 const getUserEvents = async (req, res) => {
-  const token = req.headers["x-access-token"];
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const userId = decoded.id;
+  const userId = getUserIdByToken(req.headers);
+  if (!userId) {
+    res.status(403).json({
+      success: false,
+      message: "Please input valid jwt token in request header",
+    });
+    return;
+  }
 
   await Event.find({})
     .populate("user")
@@ -44,16 +47,14 @@ const getUserEvents = async (req, res) => {
     .exec()
     .then((results) => {
       res.status(results == null ? 404 : 200).json(
-        typeof userId == "undefined"
-          ? results
-          : results.filter((item) => {
-              if (!item.participants || !item.participants.length) {
-                return false;
-              }
-              return item.participants
-                .map((e) => e.toString())
-                .includes(userId);
-            })
+        results.filter((item) => {
+          if (!item.participants || !item.participants.length) {
+            return false;
+          }
+          return item.participants
+            .map((obj) => obj.toString())
+            .includes(userId);
+        })
       );
     })
     .catch((err) => {
@@ -62,9 +63,15 @@ const getUserEvents = async (req, res) => {
 };
 
 const createEvent = async (req, res, next) => {
-  const token = req.headers["x-access-token"];
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const userId = decoded.id;
+  const userId = getUserIdByToken(req.headers);
+  if (!userId) {
+    res.status(403).json({
+      success: false,
+      message: "Please input valid jwt token in request header",
+    });
+    return;
+  }
+
   const {
     name,
     description,
@@ -116,9 +123,15 @@ const createEvent = async (req, res, next) => {
 };
 
 const joinEvent = async (req, res, next) => {
-  const token = req.headers["x-access-token"];
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const userId = decoded.id;
+  const userId = getUserIdByToken(req.headers);
+  if (!userId) {
+    res.status(403).json({
+      success: false,
+      message: "Please input valid jwt token in request header",
+    });
+    return;
+  }
+
   const eventId = req.params.eventId;
 
   try {
@@ -167,11 +180,17 @@ const updateEvent = async (req, res) => {
   try {
     event = await Event.findById(id);
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({
+      success: false,
+      message: "Could not access event by id",
+    });
     return;
   }
   if (!event) {
-    res.status(404).json(event);
+    res.status(404).json({
+      success: false,
+      message: "Event not found",
+    });
     return;
   }
 
@@ -186,7 +205,10 @@ const updateEvent = async (req, res) => {
   try {
     await event.save();
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({
+      success: false,
+      message: "Could not save event",
+    });
     return;
   }
 

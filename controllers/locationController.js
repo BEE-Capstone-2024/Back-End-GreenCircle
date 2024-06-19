@@ -1,7 +1,7 @@
-require("dotenv").config();
-const Location = require("../models/Location");
+// require("dotenv").config();
+// const jwt = require("jsonwebtoken");
 
-const jwt = require("jsonwebtoken");
+const Location = require("../models/Location");
 
 const createLocation = async (req, res, next) => {
   // const token = req.headers["x-access-token"];
