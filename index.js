@@ -31,7 +31,7 @@ app.use("/api/signin", signInRoutes);
 app.use("/api/preferences", preferencesRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/collect", collectRoutes);
-app.use("/api/location", locationRoutes);
+app.use("/api/locations", locationRoutes);
 
 app.use("/", (req, res) => {
   return res.json({

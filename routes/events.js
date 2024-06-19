@@ -1,15 +1,26 @@
-const express = require('express');
+const express = require("express");
 const {
-    createEvent,
-    joinEvent,
-}= require('../controllers/eventController');
+  getEvents,
+  createEvent,
+  joinEvent,
+  updateEvent,
+} = require("../controllers/eventController");
 
 const router = express.Router();
 
-//POST: /api/events/
-router.post("/", createEvent)
+//GET: /api/events/
+router.get("/", getEvents);
 
-//PUT: /api/events/:id
-router.put("/:eventId", joinEvent)
+//GET: /api/events/:eventId
+router.get("/:eventId", getEvents);
+
+//POST: /api/events/
+router.post("/", createEvent);
+
+//PUT: /api/events/:eventId
+router.put("/:eventId", joinEvent);
+
+//PATCH: /api/events/:eventId
+router.patch("/:eventId", updateEvent);
 
 module.exports = router;

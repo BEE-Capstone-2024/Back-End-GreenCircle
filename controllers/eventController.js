@@ -1,19 +1,55 @@
-require('dotenv').config()
-const { get } = require('mongoose');
-const Event = require('../models/Event')
-const Location = require('../models/Location')
+require("dotenv").config();
+const Event = require("../models/Event");
+const Location = require("../models/Location");
 
-const jwt = require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
+
+const getEvents = async (req, res) => {
+  const eventId = req.params.eventId;
+
+  if (typeof eventId == "undefined") {
+    await Event.find({})
+      .populate("user")
+      .populate("location")
+      .exec()
+      .then((results) => {
+        res.status(results == null ? 404 : 200).json(results);
+      })
+      .catch((err) => {
+        res.status(500).json(err);
+      });
+  } else {
+    await Event.findOne({ _id: eventId })
+      .populate("user")
+      .populate("location")
+      .populate("participants")
+      .exec()
+      .then((results) => {
+        res.status(results == null ? 404 : 200).json(results);
+      })
+      .catch((err) => {
+        res.status(500).json(err);
+      });
+  }
+};
 
 const createEvent = async (req, res, next) => {
   const token = req.headers["x-access-token"];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   const userId = decoded.id;
-  const { eventName, description, locationId, meetingLocation, dateOfEvent, startTime, endTime, participants } = req.body;
+  const {
+    name,
+    description,
+    location,
+    meetingLocation,
+    dateOfEvent,
+    startTime,
+    endTime,
+    participants,
+  } = req.body;
 
   try {
-
-    const locationExists = await Location.findById(locationId);
+    const locationExists = await Location.findById(location);
 
     if (!locationExists) {
       return res.status(404).json({
@@ -24,67 +60,114 @@ const createEvent = async (req, res, next) => {
 
     const event = new Event({
       user: userId,
-      eventName,
+      name,
       description,
-      locationId,
+      location,
       meetingLocation,
       dateOfEvent,
       startTime,
       endTime,
-      participants: participants || [userId]
+      participants: participants || [userId],
     });
 
     const savedEvent = await event.save();
 
+    if (savedEvent == null) {
+      res.status(404).json(savedEvent);
+    } else {
+      res.status(201).json({
+        success: true,
+        savedEvent,
+      });
+    }
+  } catch (error) {
+    res.status(500).json(error);
+    console.log(error);
+    return next(error);
+  }
+};
+
+const joinEvent = async (req, res, next) => {
+  const token = req.headers["x-access-token"];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const userId = decoded.id;
+  const eventId = req.params.eventId;
+
+  try {
+    const event = await Event.findOne({ _id: eventId });
+
+    if (!event) {
+      res.status(404);
+      return next(new Error("Event not found"));
+    }
+
+    if (event.participants.includes(userId)) {
+      res.status(400).json({
+        success: false,
+        message: "User already joined the event",
+      });
+      return;
+    }
+
+    event.participants.push(userId);
+
+    const updatedEvent = await event.save();
+
     res.status(200).json({
       success: true,
-      savedEvent,
+      updatedEvent,
     });
-
   } catch (error) {
     console.log(error);
     return next(error);
   }
-}
+};
 
-const joinEvent = async (req, res, next) => {
-    const token = req.headers["x-access-token"];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.id;
-    const eventId = req.params.eventId;
-  
-    try {
-      const event = await Event.findOne({ _id: eventId });
-  
-      if (!event) {
-        res.status(404);
-        return next(new Error("Event not found"));
-      }
-  
-      if (event.participants.includes(userId)) {
-        res.status(400).json({
-          success: false,
-          message: "User already joined the event",
-        });
-        return;
-      }
-  
-      event.participants.push(userId);
-  
-      const updatedEvent = await event.save();
-  
-      res.status(200).json({
-        success: true,
-        updatedEvent,
-      });
-  
-    } catch (error) {
-      console.log(error);
-      return next(error);
-    }
+const updateEvent = async (req, res) => {
+  const {
+    name,
+    description,
+    location,
+    meetingLocation,
+    dateOfEvent,
+    startTime,
+    endTime,
+  } = req.body;
+  const id = req.params.eventId;
+
+  let event;
+  try {
+    event = await Event.findById(id);
+  } catch (err) {
+    res.status(500).json(err);
+    return;
+  }
+  if (!event) {
+    res.status(404).json(event);
+    return;
   }
 
+  event.name = name ?? event.name;
+  event.description = description ?? event.description;
+  event.location = location ?? event.location;
+  event.meetingLocation = meetingLocation ?? event.meetingLocation;
+  event.dateOfEvent = dateOfEvent ?? event.dateOfEvent;
+  event.startTime = startTime ?? event.startTime;
+  event.endTime = endTime ?? event.endTime;
+
+  try {
+    await event.save();
+  } catch (err) {
+    res.status(500).json(err);
+    return;
+  }
+
+  res.status(200).json({ event: event.toObject({ getters: true }) });
+};
+
 module.exports = {
-    createEvent,
-    joinEvent,
-}
+  getEvents,
+  createEvent,
+  joinEvent,
+  updateEvent,
+};
