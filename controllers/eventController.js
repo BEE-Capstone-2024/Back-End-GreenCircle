@@ -33,6 +33,34 @@ const getEvents = async (req, res) => {
   }
 };
 
+const getUserEvents = async (req, res) => {
+  const token = req.headers["x-access-token"];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const userId = decoded.id;
+
+  await Event.find({})
+    .populate("user")
+    .populate("location")
+    .exec()
+    .then((results) => {
+      res.status(results == null ? 404 : 200).json(
+        typeof userId == "undefined"
+          ? results
+          : results.filter((item) => {
+              if (!item.participants || !item.participants.length) {
+                return false;
+              }
+              return item.participants
+                .map((e) => e.toString())
+                .includes(userId);
+            })
+      );
+    })
+    .catch((err) => {
+      res.status(500).json(err);
+    });
+};
+
 const createEvent = async (req, res, next) => {
   const token = req.headers["x-access-token"];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -167,6 +195,7 @@ const updateEvent = async (req, res) => {
 
 module.exports = {
   getEvents,
+  getUserEvents,
   createEvent,
   joinEvent,
   updateEvent,
