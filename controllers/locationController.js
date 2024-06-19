@@ -69,7 +69,7 @@ const getLocations = async (req, res, next) => {
         res.status(500).json(err);
       });
   } else {
-    await Event.findOne({ _id: id })
+    await Location.findOne({ _id: id })
       .exec()
       .then((results) => {
         res.status(results == null ? 404 : 200).json(results);
