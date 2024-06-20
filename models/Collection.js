@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const opts = { toJSON: { virtuals: true } };
 // const bcrypt = require("bcryptjs");
 
 const collectionSchema = new mongoose.Schema(
@@ -13,42 +14,27 @@ const collectionSchema = new mongoose.Schema(
       ref: "Event",
       required: [true, "Event ID is required"],
     },
-    counts: {
-      plastic: {
-        type: Number,
-        min: 0,
-        default: 0,
+    counts: [
+      {
+        material: {
+          type: String,
+          required: [true, "Material type is required"],
+          trim: true,
+        },
+        count: { type: Number, min: 0, default: 0 },
       },
-      tobacco: {
-        type: Number,
-        min: 0,
-        default: 0,
-      },
-      metal: {
-        type: Number,
-        min: 0,
-        default: 0,
-      },
-      glass: {
-        type: Number,
-        min: 0,
-        default: 0,
-      },
-      fabric: {
-        type: Number,
-        min: 0,
-        default: 0,
-      },
-      paper: {
-        type: Number,
-        min: 0,
-        default: 0,
-      },
-    },
+    ],
   },
   {
     timestamps: true,
-  }
+  },
+  opts
 );
+
+collectionSchema.virtual("totalCount").get(function () {
+  return this.counts
+    .map((element) => element.count)
+    .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+});
 
 module.exports = mongoose.model("Collection", collectionSchema);

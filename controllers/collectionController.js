@@ -1,5 +1,6 @@
 const Collection = require("../models/Collection");
 const getUserIdByToken = require("../middlewares/jwtUtils");
+const materialTypes = require("../middlewares/materialTypes");
 
 const getCollections = async (req, res) => {
   const collectionId = req.params.collectionId;
@@ -18,7 +19,9 @@ const getCollections = async (req, res) => {
       .populate("event")
       .exec()
       .then((results) => {
-        res.status(results == null ? 404 : 200).json(results);
+        res
+          .status(results == null ? 404 : 200)
+          .json(results.toJSON({ virtuals: true }));
       })
       .catch((err) => {
         res.status(500).json(err);
@@ -29,7 +32,9 @@ const getCollections = async (req, res) => {
       .populate("event")
       .exec()
       .then((results) => {
-        res.status(results == null ? 404 : 200).json(results);
+        res
+          .status(results == null ? 404 : 200)
+          .json(results.toJSON({ virtuals: true }));
       })
       .catch((err) => {
         res.status(500).json(err);
@@ -49,21 +54,13 @@ const createCollection = async (req, res, next) => {
 
   const eventId = req.params.eventId;
 
-  // const { counts } = req.body;
-  // const { plastic, tobacco, metal, glass, fabric, paper } = counts;
-
   try {
     const collection = new Collection({
       user: userId,
       event: eventId,
-      // counts: {
-      //   plastic,
-      //   tobacco,
-      //   metal,
-      //   glass,
-      //   fabric,
-      //   paper,
-      // },
+      counts: materialTypes.map((mtype) => {
+        return { material: mtype };
+      }),
     });
 
     const savedCollection = await collection.save();
@@ -80,9 +77,8 @@ const createCollection = async (req, res, next) => {
 };
 
 const updateCollection = async (req, res) => {
-  const { counts } = req.body;
-  const { plastic, tobacco, metal, glass, fabric, paper } = counts;
   const id = req.params.collectionId;
+  const materialType = req.params.materialType;
 
   let collection;
   try {
@@ -102,12 +98,20 @@ const updateCollection = async (req, res) => {
     return;
   }
 
-  collection.counts.plastic = plastic ?? collection.counts.plastic;
-  collection.counts.tobacco = tobacco ?? collection.counts.tobacco;
-  collection.counts.metal = metal ?? collection.counts.metal;
-  collection.counts.glass = glass ?? collection.counts.glass;
-  collection.counts.fabric = fabric ?? collection.counts.fabric;
-  collection.counts.paper = paper ?? collection.counts.paper;
+  if (typeof materialType == "undefined") {
+    // clear count of all materials
+    collection.counts = materialTypes.map((mtype) => {
+      return { material: mtype };
+    });
+  } else {
+    // count up collection by material id
+    collection.counts.map((element) => {
+      if (element.material == materialType) {
+        element.count++;
+      }
+      return element;
+    });
+  }
 
   try {
     await collection.save();
@@ -122,11 +126,8 @@ const updateCollection = async (req, res) => {
   res.status(200).json({ collection: collection.toObject({ getters: true }) });
 };
 
-const countUpCollection = async (req, res) => {};
-
 module.exports = {
   getCollections,
   createCollection,
   updateCollection,
-  countUpCollection,
 };

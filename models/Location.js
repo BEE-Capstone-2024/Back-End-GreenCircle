@@ -6,6 +6,7 @@ const locationSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "Name is required"],
+      trim: true,
       unique: true,
     },
     picture: {
@@ -26,10 +27,11 @@ const locationSchema = new mongoose.Schema(
     },
     category: {
       type: String,
+      enum: ["Park", "Beach", "Trail"],
       required: [true, "Category is required"],
     },
     amenities: {
-      type: [{ type: String }],
+      type: [{ type: String, required: [true, "Amenity name is required"] }],
       default: [],
     },
   },
