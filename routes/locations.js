@@ -1,15 +1,22 @@
-const express = require('express');
+const express = require("express");
 const {
-    createLocation,
-    getLocations,
-} = require('../controllers/locationController');
+  getLocations,
+  createLocation,
+  updateLocation,
+} = require("../controllers/locationController");
 
 const router = express.Router();
 
-//POST: /api/location
-router.post("/", createLocation)
+//GET: /api/locations
+router.get("/", getLocations);
 
-//GET: /api/location
-router.get("/", getLocations)
+//GET: /api/locations/:locationId
+router.get("/:locationId", getLocations);
+
+//POST: /api/locations
+router.post("/", createLocation);
+
+//PATCH: /api/locations/:locationId
+router.patch("/:locationId", updateLocation);
 
 module.exports = router;
