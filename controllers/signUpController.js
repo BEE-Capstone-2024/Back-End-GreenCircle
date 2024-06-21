@@ -23,7 +23,7 @@ const createUser = async (req, res, next) => {
     await user.save();
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: 60 * 60 * 24,
+      expiresIn: 60 * 60 * 24 *90
     });
 
     const userObject = user.toObject();
