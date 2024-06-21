@@ -27,7 +27,7 @@ const getUser = async (req, res, next) => {
         delete userObject.password
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-            expiresIn: 60 * 60 * 24
+            expiresIn: 60 * 60 * 24 * 90
         })
 
         res.status(200).json({
