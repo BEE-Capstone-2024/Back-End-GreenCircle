@@ -11,7 +11,6 @@ const locationSchema = new mongoose.Schema(
     },
     picture: {
       type: String,
-      required: [true, "Picture is required"],
     },
     longitude: {
       type: Number,
@@ -23,7 +22,7 @@ const locationSchema = new mongoose.Schema(
     },
     radius: {
       type: Number,
-      required: [true, "Radius is required"],
+      default: 300,
     },
     category: {
       type: String,
