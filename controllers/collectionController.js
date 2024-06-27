@@ -79,6 +79,7 @@ const createCollection = async (req, res, next) => {
 const updateCollection = async (req, res) => {
   const id = req.params.collectionId;
   const materialType = req.params.materialType;
+  const action = req.body.action; // Expect 'increment' or 'decrement' in the request body
 
   let collection;
   try {
@@ -101,13 +102,17 @@ const updateCollection = async (req, res) => {
   if (typeof materialType == "undefined") {
     // clear count of all materials
     collection.counts = materialTypes.map((mtype) => {
-      return { material: mtype };
+      return { material: mtype, count: 0 }; // Initialize count to 0
     });
   } else {
-    // count up collection by material id
-    collection.counts.map((element) => {
+    // update count based on action
+    collection.counts = collection.counts.map((element) => {
       if (element.material == materialType) {
-        element.count++;
+        if (action === "increment") {
+          element.count++;
+        } else if (action === "decrement") {
+          element.count = Math.max(0, element.count - 1); // Ensure count doesn't go below 0
+        }
       }
       return element;
     });
@@ -125,6 +130,7 @@ const updateCollection = async (req, res) => {
 
   res.status(200).json({ collection: collection.toObject({ getters: true }) });
 };
+
 
 module.exports = {
   getCollections,
