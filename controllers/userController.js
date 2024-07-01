@@ -16,7 +16,6 @@ const getUser = async (req, res, next) => {
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log(decoded);
     } catch (err) {
       return res.status(401).json({
         success: false,
@@ -24,17 +23,15 @@ const getUser = async (req, res, next) => {
       });
     }
 
-     const id = decoded.id;
-     console.log("Decoded ID:", id); // Debugging line
+    const id = decoded.id;
 
-     const user = await User.findById(id);
-     if (!user) {
-       console.error("User not found with ID:", id); // Debugging line
-       return res.status(404).json({
-         success: false,
-         message: "User not found",
-       });
-     }
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     res.status(200).json({
       success: true,
