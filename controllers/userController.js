@@ -1,7 +1,47 @@
-require('dotenv').config();
+require("dotenv").config();
 const User = require("../models/User");
 
 const jwt = require("jsonwebtoken");
+
+const getUser = async (req, res, next) => {
+  try {
+    const token = req.headers["x-access-token"];
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "No token provided",
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        message: "Failed to authenticate token",
+      });
+    }
+
+    const id = decoded.id;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      user: user.toObject({ getters: true, versionKey: false }),
+    });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
 
 const updateUser = async (req, res, next) => {
   const token = req.headers["x-access-token"];
@@ -19,18 +59,18 @@ const updateUser = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         auth: false,
-        message: "No token provided."
-      })
+        message: "No token provided.",
+      });
     }
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
         return res.status(500).json({
           auth: false,
-          message: "Failed to authenticate token."
-        })
+          message: "Failed to authenticate token.",
+        });
       }
-    })
+    });
 
     let updatedUser = await User.findById(id);
 
@@ -46,13 +86,12 @@ const updateUser = async (req, res, next) => {
       {
         new: true,
       }
-    ).select('-password');
+    ).select("-password");
 
     res.status(200).json({
       success: true,
       updatedUser,
     });
-
   } catch (error) {
     console.log(error);
     return next(error);
@@ -84,4 +123,5 @@ const deleteUser = async (req, res, next) => {
 module.exports = {
   updateUser,
   deleteUser,
+  getUser,
 };
