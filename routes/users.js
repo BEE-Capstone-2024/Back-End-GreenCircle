@@ -2,6 +2,7 @@ const express = require("express");
 const {
   updateUser,
   deleteUser,
+  getUser
 } = require("../controllers/userController");
 
 
@@ -12,5 +13,8 @@ router.put("/", updateUser);
 
 // DELETE: /api/user/id
 router.delete("/:id", deleteUser);
+
+//GET: /api/user
+router.get("/info", getUser);
 
 module.exports = router;
