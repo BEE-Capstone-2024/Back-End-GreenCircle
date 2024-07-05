@@ -5,6 +5,7 @@ const {
   createEvent,
   joinEvent,
   updateEvent,
+  checkInUser,
 } = require("../controllers/eventController");
 
 const router = express.Router();
@@ -23,6 +24,8 @@ router.post("/", createEvent);
 
 //PUT: /api/events/:eventId
 router.put("/:eventId", joinEvent);
+
+router.put("/:eventId/checkin", checkInUser);
 
 //PATCH: /api/events/:eventId
 router.patch("/:eventId", updateEvent);
