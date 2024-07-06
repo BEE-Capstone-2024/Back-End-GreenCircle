@@ -7,7 +7,6 @@ const getCollections = async (req, res) => {
 
   if (typeof collectionId == "undefined") {
     const userId = getUserIdByToken(req.headers);
-    console.log(userId);
     if (!userId) {
       res.status(403).json({
         success: false,
