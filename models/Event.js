@@ -45,6 +45,10 @@ const eventSchema = new mongoose.Schema(
       type: [{ type: mongoose.Types.ObjectId, ref: "User" }],
       default: [],
     },
+    collections: {
+      type: [{ type: mongoose.Types.ObjectId }],
+      default: [],
+    },
   },
   {
     timestamps: true,

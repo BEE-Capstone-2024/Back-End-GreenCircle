@@ -3,15 +3,16 @@ const {
   getCollections,
   createCollection,
   updateCollection,
+  getCollectionsById,
 } = require("../controllers/collectionController");
 
 const router = express.Router();
 
-//GET: /api/collections/:collectionId
-router.get("/:collectionId", getCollections);
-
 //GET: /api/collections/
 router.get("/", getCollections);
+
+//GET: /api/collections/:collectionId
+router.get("/:collectionId", getCollectionsById);
 
 //POST: /api/collections/:eventId
 router.post("/:eventId", createCollection);

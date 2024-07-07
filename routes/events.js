@@ -6,6 +6,7 @@ const {
   joinEvent,
   updateEvent,
   checkInUser,
+  addCollectionToEvent,
 } = require("../controllers/eventController");
 
 const router = express.Router();
@@ -25,7 +26,11 @@ router.post("/", createEvent);
 //PUT: /api/events/:eventId
 router.put("/:eventId", joinEvent);
 
+//PUT: /api/events/:eventId/checkin
 router.put("/:eventId/checkin", checkInUser);
+
+//PUT: /api/events/:eventId/collections
+router.put("/:eventId/collections/:collectionId", addCollectionToEvent);
 
 //PATCH: /api/events/:eventId
 router.patch("/:eventId", updateEvent);
