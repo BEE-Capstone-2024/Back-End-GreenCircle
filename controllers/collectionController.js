@@ -14,17 +14,63 @@ const getCollections = async (req, res) => {
       });
       return;
     }
-    await Collection.find({})
-      .populate("user")
+    await Collection.find({ user: userId })
       .populate("event")
       .exec()
       .then((results) => {
-        res
-          .status(results == null ? 404 : 200)
-          .json(results.toJSON({ virtuals: true }));
+        if (!results || results.length === 0) {
+          res.status(404).json({
+            success: false,
+            message: "No collections found for this user.",
+          });
+        } else {
+          results.sort(
+            (a, b) =>
+              new Date(a.event.dateOfEvent) - new Date(b.event.dateOfEvent)
+          );
+
+          let materialSums = {};
+          let totalMaterialCount = 0;
+          let totalEventCount = results.length;
+          let eventDatesWithSequence = [];
+          let eventCounter = 0;
+
+          const collections = results.map((result) => {
+            const collection = result.toJSON({ virtuals: true });
+
+            eventCounter += 1;
+            eventDatesWithSequence.push({
+              dateOfEvent: collection.event.dateOfEvent,
+              sequence: eventCounter,
+            });
+
+            collection.counts.forEach((count) => {
+              if (!materialSums[count.material]) {
+                materialSums[count.material] = 0;
+              }
+              materialSums[count.material] += count.count;
+              totalMaterialCount += count.count;
+            });
+
+            return collection;
+          });
+
+          res.status(200).json({
+            success: true,
+            collections: collections,
+            materialSums: materialSums,
+            totalMaterialCount: totalMaterialCount,
+            totalEventCount: totalEventCount,
+            eventDatesWithSequence: eventDatesWithSequence,
+          });
+        }
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({
+          success: false,
+          message: "Server error",
+          error: err.message,
+        });
       });
   } else {
     await Collection.findOne({ _id: collectionId })
@@ -42,6 +88,8 @@ const getCollections = async (req, res) => {
   }
 };
 
+
+
 const createCollection = async (req, res, next) => {
   const userId = getUserIdByToken(req.headers);
   if (!userId) {
@@ -55,6 +103,22 @@ const createCollection = async (req, res, next) => {
   const eventId = req.params.eventId;
 
   try {
+    // Check if a collection already exists for this event and user
+    const existingCollection = await Collection.findOne({
+      user: userId,
+      event: eventId,
+    });
+
+    if (existingCollection) {
+      // If collection exists, return it
+      res.status(200).json({
+        success: true,
+        savedCollection: existingCollection,
+      });
+      return;
+    }
+
+    // If collection does not exist, create a new one
     const collection = new Collection({
       user: userId,
       event: eventId,
@@ -76,9 +140,11 @@ const createCollection = async (req, res, next) => {
   }
 };
 
+
 const updateCollection = async (req, res) => {
   const id = req.params.collectionId;
   const materialType = req.params.materialType;
+  const action = req.body.action; // Expect 'increment' or 'decrement' in the request body
 
   let collection;
   try {
@@ -101,13 +167,17 @@ const updateCollection = async (req, res) => {
   if (typeof materialType == "undefined") {
     // clear count of all materials
     collection.counts = materialTypes.map((mtype) => {
-      return { material: mtype };
+      return { material: mtype, count: 0 }; // Initialize count to 0
     });
   } else {
-    // count up collection by material id
-    collection.counts.map((element) => {
+    // update count based on action
+    collection.counts = collection.counts.map((element) => {
       if (element.material == materialType) {
-        element.count++;
+        if (action === "increment") {
+          element.count++;
+        } else if (action === "decrement") {
+          element.count = Math.max(0, element.count - 1); // Ensure count doesn't go below 0
+        }
       }
       return element;
     });
@@ -126,8 +196,36 @@ const updateCollection = async (req, res) => {
   res.status(200).json({ collection: collection.toObject({ getters: true }) });
 };
 
+
+
+const getCollectionsById = async (req, res) => {
+  const collectionId = req.params.collectionId;
+
+  try {
+    const collection = await Collection.findById(collectionId)
+      .populate("user")
+      .populate("event")
+      .exec();
+
+    if (!collection) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Collection not found" });
+    }
+
+    res.status(200).json(collection.toJSON({ virtuals: true }));
+  } catch (err) {
+    console.error("Error fetching collection:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
+
+
 module.exports = {
   getCollections,
   createCollection,
   updateCollection,
+  getCollectionsById,
 };

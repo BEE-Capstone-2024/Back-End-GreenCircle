@@ -81,6 +81,8 @@ const createEvent = async (req, res, next) => {
     startTime,
     endTime,
     participants,
+    peopleCheckIn,
+    collections,
   } = req.body;
 
   try {
@@ -103,6 +105,8 @@ const createEvent = async (req, res, next) => {
       startTime,
       endTime,
       participants: participants || [userId],
+      peopleCheckIn: peopleCheckIn || [],
+      collections: collections || [],
     });
 
     const savedEvent = await event.save();
@@ -147,6 +151,7 @@ const joinEvent = async (req, res, next) => {
     }
 
     event.participants.push(userId);
+    
 
     const updatedEvent = await event.save();
 
@@ -159,6 +164,8 @@ const joinEvent = async (req, res, next) => {
     return next(error);
   }
 };
+
+
 
 const updateEvent = async (req, res) => {
   const {
@@ -211,10 +218,96 @@ const updateEvent = async (req, res) => {
   res.status(200).json({ event: event.toObject({ getters: true }) });
 };
 
+const checkInUser = async (req, res) => {
+  const userId = getUserIdByToken(req.headers);
+  if (!userId) {
+    res.status(403).json({
+      success: false,
+      message: "Please input valid jwt token in request header",
+    });
+    return;
+  }
+
+  const eventId = req.params.eventId;
+
+  try {
+    const event = await Event.findOne({ _id: eventId });
+
+    if (!event) {
+      res.status(404);
+      return next(new Error("Event not found"));
+    }
+
+    if (!event.peopleCheckIn.includes(userId)) {
+      event.peopleCheckIn.push(userId);
+      await event.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User checked in successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+const addCollectionToEvent = async (req, res, next) => {
+  const userId = getUserIdByToken(req.headers);
+  if (!userId) {
+    res.status(403).json({
+      success: false,
+      message: "Please input valid jwt token in request header",
+    });
+    return;
+  }
+
+  const eventId = req.params.eventId;
+  const collectionId = req.params.collectionId; 
+
+  try {
+    const event = await Event.findOne({ _id: eventId });
+
+    if (!event) {
+      res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+      return;
+    }
+
+    if (event.collections.includes(collectionId)) {
+      res.status(400).json({
+        success: false,
+        message: "Collection already added to the event",
+      });
+      return;
+    }
+
+    event.collections.push(collectionId);
+    const updatedEvent = await event.save();
+
+    res.status(200).json({
+      success: true,
+      updatedEvent,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Error adding collection to event",
+    });
+    return next(error);
+  }
+};
+
 module.exports = {
   getEvents,
   getUserEvents,
   createEvent,
   joinEvent,
   updateEvent,
+  checkInUser,
+  addCollectionToEvent,
 };
