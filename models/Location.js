@@ -22,7 +22,7 @@ const locationSchema = new mongoose.Schema(
     },
     radius: {
       type: Number,
-      default: 300,
+      default: 800,
     },
     category: {
       type: String,
