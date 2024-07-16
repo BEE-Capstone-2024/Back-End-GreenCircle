@@ -88,8 +88,6 @@ const getCollections = async (req, res) => {
   }
 };
 
-
-
 const createCollection = async (req, res, next) => {
   const userId = getUserIdByToken(req.headers);
   if (!userId) {
@@ -139,7 +137,6 @@ const createCollection = async (req, res, next) => {
     return next(error);
   }
 };
-
 
 const updateCollection = async (req, res) => {
   const id = req.params.collectionId;
@@ -196,8 +193,6 @@ const updateCollection = async (req, res) => {
   res.status(200).json({ collection: collection.toObject({ getters: true }) });
 };
 
-
-
 const getCollectionsById = async (req, res) => {
   const collectionId = req.params.collectionId;
 
@@ -220,12 +215,56 @@ const getCollectionsById = async (req, res) => {
   }
 };
 
+const getCollectionStatus = async (req, res) => {
+  const collectionId = req.params.collectionId;
+
+  try {
+    const collection = await Collection.findById(collectionId);
+
+    if (!collection) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Collection not found" });
+    }
+
+    const isCompleted = collection.completed;
+    res.status(200).json(isCompleted);
+  } catch (err) {
+    console.error(`Error fetching collection status ${collectionId}:`, err);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: err.message });
+  }
+};
 
 
+// Update collection status
+const updateCollectionStatus = async (req, res) => {
+  const { collectionId } = req.params;
+  const { completed } = req.body;
 
+  try {
+    const updatedCollection = await Collection.findByIdAndUpdate(
+      collectionId,
+      { completed },
+      { new: true }
+    );
+
+    if (!updatedCollection) {
+      return res.status(404).json({ message: 'Collection not found' });
+    }
+
+    res.status(200).json(updatedCollection);
+  } catch (error) {
+    console.error(`Error updating collection status: ${error}`);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 module.exports = {
   getCollections,
   createCollection,
   updateCollection,
   getCollectionsById,
+  getCollectionStatus,
+  updateCollectionStatus,
 };
