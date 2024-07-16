@@ -227,8 +227,8 @@ const getCollectionStatus = async (req, res) => {
         .json({ success: false, message: "Collection not found" });
     }
 
-    const isCompleted = collection.isCompleted;
-    res.status(200).json({ success: true, isCompleted });
+    const isCompleted = collection.completed;
+    res.status(200).json(isCompleted);
   } catch (err) {
     console.error(`Error fetching collection status ${collectionId}:`, err);
     res
@@ -236,6 +236,7 @@ const getCollectionStatus = async (req, res) => {
       .json({ success: false, message: "Server error", error: err.message });
   }
 };
+
 
 // Update collection status
 const updateCollectionStatus = async (req, res) => {
