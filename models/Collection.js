@@ -24,6 +24,10 @@ const collectionSchema = new mongoose.Schema(
         count: { type: Number, min: 0, default: 0 },
       },
     ],
+    completed: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
